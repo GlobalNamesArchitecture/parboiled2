@@ -18,7 +18,6 @@ package org.parboiled2.examples
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success}
-import scala.io.StdIn
 import org.parboiled2._
 
 object Calculator2 extends App {
@@ -63,8 +62,10 @@ object Calculator2 extends App {
   repl()
 
   @tailrec
-  def repl(): Unit =
-    StdIn.readLine("---\nEnter calculator expression > ") match {
+  def repl(): Unit = {
+    print("---\nEnter calculator expression > ")
+    Console.out.flush()
+    Console.readLine() match {
       case "" =>
       case line =>
         Parser.InputLine.run(line) match {
@@ -74,6 +75,7 @@ object Calculator2 extends App {
         }
         repl()
     }
+  }
 
   def eval(expr: Expr): Int =
     expr match {

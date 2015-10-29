@@ -17,7 +17,8 @@
 package org.parboiled2
 
 import scala.annotation.unchecked.uncheckedVariance
-import scala.annotation.{ implicitNotFound, compileTimeOnly }
+import scala.annotation.implicitNotFound
+import scala.reflect.internal.annotations.compileTimeOnly
 import scala.collection.immutable
 import org.parboiled2.support._
 import shapeless._

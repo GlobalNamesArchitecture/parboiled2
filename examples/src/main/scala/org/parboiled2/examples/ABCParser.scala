@@ -18,7 +18,6 @@ package org.parboiled2.examples
 
 import scala.annotation.tailrec
 import scala.util.{ Success, Failure }
-import scala.io.StdIn
 import org.parboiled2.{ParseError, SimpleParser}
 
 object ABCParser extends App {
@@ -42,15 +41,18 @@ object ABCParser extends App {
   repl()
 
   @tailrec
-  def repl(): Unit =
-    StdIn.readLine("---\nEnter expression for abc-parser > ") match {
+  def repl(): Unit = {
+    print("---\nEnter expression for abc-parser > ")
+    Console.out.flush()
+    Console.readLine() match {
       case "" ⇒ // terminate
       case line ⇒
         Parser.InputLine.run(line) match {
-          case Success(_)             ⇒ println("Expression is valid")
+          case Success(_) ⇒ println("Expression is valid")
           case Failure(e: ParseError) ⇒ println("Expression is not valid: " + e.format(line))
-          case Failure(e)             ⇒ println("Unexpected error during parsing run: " + e)
+          case Failure(e) ⇒ println("Unexpected error during parsing run: " + e)
         }
         repl()
     }
+  }
 }

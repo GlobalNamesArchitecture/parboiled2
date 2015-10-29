@@ -16,13 +16,13 @@
 
 package org.parboiled2
 
-import scala.annotation.compileTimeOnly
+import scala.reflect.internal.annotations.compileTimeOnly
 import org.parboiled2.support._
 import shapeless.{ HNil, HList }
 
 trait RuleDSLBasics { this: RuleTypes ⇒
 
-  private type Rule0 = Rule[Any, HNil, HNil] // local brevity alias
+  private type Rule0_ = Rule[Any, HNil, HNil] // local brevity alias
 
   /**
    * Returns the [[ParserState]] for the current run.
@@ -40,19 +40,19 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * Matches the given single character.
    */
   @compileTimeOnly("Calls to `ch` must be inside `rule` macro")
-  implicit def ch(c: Char): Rule0 = `n/a`
+  implicit def ch(c: Char): Rule0_ = `n/a`
 
   /**
    * Matches the given string of characters.
    */
   @compileTimeOnly("Calls to `str` must be inside `rule` macro")
-  implicit def str(s: String): Rule0 = `n/a`
+  implicit def str(s: String): Rule0_ = `n/a`
 
   /**
    * Matches any (single) character matched by the given `CharPredicate`.
    */
   @compileTimeOnly("Calls to `predicate` must be inside `rule` macro")
-  implicit def predicate(p: CharPredicate): Rule0 = `n/a`
+  implicit def predicate(p: CharPredicate): Rule0_ = `n/a`
 
   /**
    * Matches any of the given maps keys and pushes the respective value upon
@@ -69,7 +69,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * [[CharPredicate]] will be more efficient.
    */
   @compileTimeOnly("Calls to `anyOf` must be inside `rule` macro")
-  def anyOf(chars: String): Rule0 = `n/a`
+  def anyOf(chars: String): Rule0_ = `n/a`
 
   /**
    * Matches any single character except the ones in the given string and except EOI.
@@ -79,7 +79,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * [[CharPredicate]] will be more efficient.
    */
   @compileTimeOnly("Calls to `noneOf` must be inside `rule` macro")
-  def noneOf(chars: String): Rule0 = `n/a`
+  def noneOf(chars: String): Rule0_ = `n/a`
 
   /**
    * Matches the given single character case insensitively.
@@ -87,7 +87,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * This requirement is currently NOT enforced!
    */
   @compileTimeOnly("Calls to `ignoreCase` must be inside `rule` macro")
-  def ignoreCase(c: Char): Rule0 = `n/a`
+  def ignoreCase(c: Char): Rule0_ = `n/a`
 
   /**
    * Matches the given string of characters case insensitively.
@@ -95,13 +95,13 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * This requirement is currently NOT enforced!
    */
   @compileTimeOnly("Calls to `ignoreCase` must be inside `rule` macro")
-  def ignoreCase(s: String): Rule0 = `n/a`
+  def ignoreCase(s: String): Rule0_ = `n/a`
 
   /**
    * Matches any character except EOI.
    */
   @compileTimeOnly("Calls to `ANY` must be inside `rule` macro")
-  def ANY: Rule0 = `n/a`
+  def ANY: Rule0_ = `n/a`
 
   /**
    * Matches the EOI (end-of-input) character.
@@ -112,13 +112,13 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * Matches no character (i.e. doesn't cause the parser to make any progress) but succeeds always (as a rule).
    */
   @compileTimeOnly("Calls to `MATCH` must be inside `rule` macro")
-  def MATCH: Rule0 = `n/a`
+  def MATCH: Rule0_ = `n/a`
 
   /**
-   * A Rule0 that always fails.
+   * A Rule0_ that always fails.
    */
   @compileTimeOnly("Calls to `MISMATCH0` must be inside `rule` macro")
-  def MISMATCH0: Rule0 = `n/a`
+  def MISMATCH0: Rule0_ = `n/a`
 
   /**
    * A generic Rule that always fails.
@@ -130,7 +130,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * A rule that always fails and causes the parser to immediately terminate the parsing run.
    * The resulting parse error only has a single trace with a single frame which holds the given error message.
    */
-  def fail(expected: String): Rule0 = `n/a`
+  def fail(expected: String): Rule0_ = `n/a`
 
   /**
    * Fully generic variant of [[fail]].
@@ -140,6 +140,6 @@ trait RuleDSLBasics { this: RuleTypes ⇒
   @compileTimeOnly("Calls to `str2CharRangeSupport` must be inside `rule` macro")
   implicit def str2CharRangeSupport(s: String): CharRangeSupport = `n/a`
   sealed trait CharRangeSupport {
-    def -(other: String): Rule0
+    def -(other: String): Rule0_
   }
 }

@@ -19,7 +19,7 @@ package org.parboiled2.support
 import scala.annotation.tailrec
 import org.parboiled2._
 
-class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeCtx) {
+class OpTreeContext[OpTreeCtx <: reflect.macros.Context](val c: OpTreeCtx) {
   import c.universe._
 
   var tpeCtx: c.Type = _
@@ -129,11 +129,11 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
         case x: WithSeparator ⇒ x.withSeparator(Separator(OpTree(sep)))
         case _                ⇒ c.abort(x.pos, "Illegal `separatedBy` base: " + base)
       }
-    case Apply(Select(target, TermName("apply")), List(arg0, arg1, arg2)) if isSubType(target, Rule3XType) ⇒
+    case Apply(Select(target, sel), List(arg0, arg1, arg2)) if sel.toString == "apply" && isSubType(target, Rule3XType) ⇒
       RuleCall(Call3(target, arg0, arg1, arg2), callName(target, "Unexpected Rule3X call: "))
-    case Apply(Select(target, TermName("apply")), List(arg0, arg1)) if isSubType(target, Rule2XType) ⇒
+    case Apply(Select(target, sel), List(arg0, arg1)) if sel.toString == "apply" && isSubType(target, Rule2XType) ⇒
       RuleCall(Call2(target, arg0, arg1), callName(target, "Unexpected Rule2X call: "))
-    case Apply(Select(target, TermName("apply")), List(arg)) if isSubType(target, Rule1XType) ⇒
+    case Apply(Select(target, sel), List(arg)) if sel.toString == "apply" && isSubType(target, Rule1XType) ⇒
       RuleCall(Call1(target, arg), callName(target, "Unexpected Rule1X call: "))
     case call @ (Apply(_, _) | Select(_, _) | Ident(_) | TypeApply(_, _)) ⇒
       RuleCall(Call0(call), callName(call, "Unexpected call: "))
@@ -637,7 +637,7 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
       val typeParams = (1 to typeParamCount).toList.map {
         classSymbol.typeParams(_).asType.toType.asSeenFrom(t.tpe, classSymbol)
       }
-      tq"$prefix.${TypeName(classSymbol.name + "Impl")}[..${tpeCtx :: typeParams}]"
+      tq"$prefix.${newTypeName(classSymbol.name + "Impl")}[..${tpeCtx :: typeParams}]"
     }
     def renderInner(wrapped: Boolean) = call.asInstanceOf[OpTreeCall].t.render(wrapped)
   }
@@ -682,7 +682,7 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
           case Block(statements, res) ⇒ block(statements, actionBody(res))
 
           case x @ (Ident(_) | Select(_, _)) ⇒
-            val valNames: List[TermName] = argTypes.indices.map { i ⇒ TermName("value" + i) }(collection.breakOut)
+            val valNames: List[TermName] = argTypes.indices.map { i ⇒ newTermName("value" + i) }(collection.breakOut)
             val args = valNames map Ident.apply
             block(popToVals(valNames), q"__psi.push($x(..$args))")
 
@@ -789,7 +789,7 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
     }
 
   object StateAccessTransformer extends Transformer with (Tree ⇒ Tree) {
-    def apply(tree: Tree): Tree = c.untypecheck(transform(tree))
+    def apply(tree: Tree): Tree = c.resetLocalAttrs(transform(tree))
     override def transform(tree: Tree): Tree =
       tree match {
         case q"$a.this.state" ⇒ q"__psi"

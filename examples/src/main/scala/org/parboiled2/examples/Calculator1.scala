@@ -18,7 +18,6 @@ package org.parboiled2.examples
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success}
-import scala.io.StdIn
 import org.parboiled2._
 
 object Calculator1 extends App {
@@ -54,15 +53,18 @@ object Calculator1 extends App {
   repl()
 
   @tailrec
-  def repl(): Unit =
-    StdIn.readLine("---\nEnter calculator expression > ") match {
+  def repl(): Unit = {
+    print("---\nEnter calculator expression > ")
+    Console.out.flush()
+    Console.readLine() match {
       case "" =>
       case line =>
         Parser.InputLine.run(line) match {
-          case Success(result)        => println("Result: " + result)
+          case Success(result) => println("Result: " + result)
           case Failure(e: ParseError) => println("Expression is not valid: " + e.format(line))
-          case Failure(e)             => println("Unexpected error during parsing run: " + e)
+          case Failure(e) => println("Unexpected error during parsing run: " + e)
         }
         repl()
     }
+  }
 }

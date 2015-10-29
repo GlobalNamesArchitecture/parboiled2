@@ -6,7 +6,7 @@ import com.typesafe.sbt.osgi.SbtOsgi._
 
 val commonSettings = Seq(
   version := "2.2.1",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.10.5",
   organization := "org.globalnames",
   homepage := Some(new URL("http://parboiled.org")),
   description := "Fast and elegant PEG parsing in Scala - lightweight, easy-to-use, powerful",
@@ -72,8 +72,11 @@ val noPublishingSettings = Seq(
 
 /////////////////////// DEPENDENCIES /////////////////////////
 
-val scalaReflect     = "org.scala-lang"  %  "scala-reflect"     % "2.11.7"   % "provided"
-val shapeless        = "com.chuusai"     %% "shapeless"         % "2.2.3"    % "compile"
+val paradiseVersion = "2.0.1"
+
+val scalaReflect     = "org.scala-lang"  %  "scala-reflect"     % "2.10.5"        % "provided"
+val shapeless        = "com.chuusai"     %  "shapeless_2.10.4"  % "2.1.0"         % "compile"
+val quasiquotes      = "org.scalamacros" %% "quasiquotes"       % paradiseVersion % "compile"
 val specs2Core       = "org.specs2"      %% "specs2-core"       % "2.4.17"   % "test"
 val specs2ScalaCheck = "org.specs2"      %% "specs2-scalacheck" % "2.4.17"   % "test"
 
@@ -116,7 +119,8 @@ lazy val parboiled = project
   .settings(formattingSettings: _*)
   .settings(publishingSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(scalaReflect, shapeless, specs2Core),
+    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
+    libraryDependencies ++= Seq(scalaReflect, shapeless, quasiquotes, specs2Core),
     mappings in (Compile, packageBin) ++= (mappings in (parboiledCore.project, Compile, packageBin)).value,
     mappings in (Compile, packageSrc) ++= (mappings in (parboiledCore.project, Compile, packageSrc)).value,
     mappings in (Compile, packageDoc) ++= (mappings in (parboiledCore.project, Compile, packageDoc)).value,
@@ -138,7 +142,8 @@ lazy val parboiledCore = project.in(file("parboiled-core"))
   .settings(formattingSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(scalaReflect, shapeless, specs2Core, specs2ScalaCheck),
+    addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full),
+    libraryDependencies ++= Seq(scalaReflect, shapeless, quasiquotes, specs2Core, specs2ScalaCheck),
     generateActionOps := ActionOpsBoilerplate((sourceManaged in Compile).value, streams.value),
     (sourceGenerators in Compile) += generateActionOps.taskValue)
   .settings(pbOsgiSettings: _*)

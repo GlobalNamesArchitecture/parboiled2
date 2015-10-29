@@ -34,8 +34,8 @@ trait L5_Exprs { this: WhitespaceStringsAndChars
   val TypeExpr = ExprCtx.Expr
   class WsCtx(injectSemicolons: Boolean){
 
-    val OneSemiMax = if (injectSemicolons) OneNLMax else rule(MATCH)
-    val NoSemis = if (injectSemicolons) NotNewline else rule(MATCH)
+    val OneSemiMax = if (injectSemicolons) OneNLMax else namedRule("OneSemiMax")(MATCH)
+    val NoSemis = if (injectSemicolons) NotNewline else namedRule("NoSemis")(MATCH)
 
     val Enumerators = {
       val Generator = rule( Pat1 ~ `<-` ~ Expr ~ Guard.? )
