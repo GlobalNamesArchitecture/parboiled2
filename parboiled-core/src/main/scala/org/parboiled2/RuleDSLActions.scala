@@ -29,7 +29,15 @@ trait RuleDSLActions { this: RuleTypes ⇒
    */
   @compileTimeOnly("Calls to `capturePos` must be inside `rule` macro")
   def capturePos[C, I <: HList, O <: HList](r: Rule[C, I, O])(
-    implicit p: Prepend[O, CapturePos :: HNil]): Rule[C, I, p.Out] = `n/a`
+    implicit p: Prepend[O, CapturePosition :: HNil]): Rule[C, I, p.Out] = `n/a`
+
+  /**
+   * Pushes the input text cursor position and string matched by its inner rule onto the value stack
+   * after its inner rule has been run successfully (and only then).
+   */
+  @compileTimeOnly("Calls to `capturePosStr` must be inside `rule` macro")
+  def capturePosStr[C, I <: HList, O <: HList](r: Rule[C, I, O])(
+    implicit p: Prepend[O, CapturePositionString :: HNil]): Rule[C, I, p.Out] = `n/a`
 
   /**
    * Pushes the input text matched by its inner rule onto the value stack

@@ -110,7 +110,8 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
     case q"$a.this.quiet[..$b]($arg)"                    ⇒ Quiet(OpTree(arg))
     case q"$a.this.test($arg)"                           ⇒ SemanticPredicate(StateAccessTransformer(arg))
     case q"$a.this.capture[..$b]($arg)($d)"              ⇒ Capture(OpTree(arg))
-    case q"$a.this.capturePos[..$b]($arg)($d)"           ⇒ CapturePos(OpTree(arg))
+    case q"$a.this.capturePos[..$b]($arg)($d)"           ⇒ CapturePosition(OpTree(arg))
+    case q"$a.this.capturePosStr[..$b]($arg)($d)"        ⇒ CapturePositionString(OpTree(arg))
     case q"$a.this.run[$b]($arg)($e.fromAux[..$d]($rr))" ⇒ RunAction(StateAccessTransformer(arg), rr)
     case q"$a.this.push[$b]($arg)($hl)"                  ⇒ PushAction(StateAccessTransformer(arg), hl)
     case q"$a.this.drop[$b]($hl)"                        ⇒ DropAction(hl)
@@ -532,13 +533,25 @@ class OpTreeContext[OpTreeCtx <: reflect.macros.blackbox.Context](val c: OpTreeC
       } else false"""
   }
 
-  case class CapturePos(op: OpTree) extends DefaultNonTerminalOpTree {
-    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePos).tree
+  case class CapturePosition(op: OpTree) extends DefaultNonTerminalOpTree {
+    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePosition).tree
     def renderInner(wrapped: Boolean): Tree = q"""
       ${if (!wrapped) q"val start = __psi.cursor" else q"();"}
       val matched = ${op.render(wrapped)}
       if (matched) {
-        __psi.valueStack.push($prefix.CapturePos(start, __psi.cursor))
+        __psi.valueStack.push($prefix.CapturePosition(start, __psi.cursor))
+        true
+      } else false"""
+  }
+
+  case class CapturePositionString(op: OpTree) extends DefaultNonTerminalOpTree {
+    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePosition).tree
+    def renderInner(wrapped: Boolean): Tree = q"""
+      ${if (!wrapped) q"val start = __psi.cursor" else q"();"}
+      val matched = ${op.render(wrapped)}
+      if (matched) {
+        val str = __psi.input.sliceString(start, __psi.cursor)
+        __psi.valueStack.push($prefix.CapturePosition(start, __psi.cursor, str))
         true
       } else false"""
   }
