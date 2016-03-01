@@ -16,55 +16,50 @@
 
 package org.parboiled2
 
-import java.lang.{ StringBuilder ⇒ JStringBuilder }
-
 /**
  * For certain high-performance use-cases it is better to construct Strings
  * that the parser is to produce/extract from the input in a char-by-char fashion.
  *
- * The object defines helper rules for this.
- * Just `import StringBuilding._` and make sure that your parser context mixes in the
- * `StringBuilding.Context` trait.
+ * Mixing this trait into your parser gives you a simple facility to support this.
  */
-object StringBuilding extends Parser {
+trait StringBuilding { this: Parser ⇒
+  protected val sb = new java.lang.StringBuilder
 
-  trait Context {
-    val sb = new JStringBuilder
-  }
+  def clearSB(): Rule0 = rule { run(sb.setLength(0)) }
 
-  val clearSB: Rule0 = rule { run(ctx.sb.setLength(0)) }
+  def appendSB(): Rule0 = rule { run(sb.append(lastChar)) }
 
-  val pushSB: Rule1[String] = rule { push { val s = ctx.sb.toString; ctx.sb.setLength(0); s } }
+  def appendSB(offset: Int): Rule0 = rule { run(sb.append(charAt(offset))) }
 
-  val appendLastChar: Rule0 = rule { run(ctx.sb.append(state.lastChar)) }
+  def appendSB(c: Char): Rule0 = rule { run(sb.append(c)) }
 
-  val appendChar: Rule10[Char] = rule[Char]() { c ⇒ run(ctx.sb.append(c)) }
+  def appendSB(s: String): Rule0 = rule { run(sb.append(s)) }
 
-  val appendString: Rule10[String] = rule[String]() { s ⇒ run(ctx.sb.append(s)) }
+  def prependSB(): Rule0 = rule { run(doPrepend(lastChar)) }
 
-  val prependLastChar: Rule0 = rule { run(doPrepend(ctx.sb, state.lastChar)) }
+  def prependSB(offset: Int): Rule0 = rule { run(doPrepend(charAt(offset))) }
 
-  val prependChar: Rule10[Char] = rule[Char]() { c ⇒ run(doPrepend(ctx.sb, c)) }
+  def prependSB(c: Char): Rule0 = rule { run(doPrepend(c)) }
 
-  val prependString: Rule10[String] = rule[String]() { s ⇒ run(doPrepend(ctx.sb, s)) }
+  def prependSB(s: String): Rule0 = rule { run(doPrepend(s)) }
 
-  val setSB: Rule10[String] = rule[String]() { s ⇒ run(doSet(ctx.sb, s)) }
+  def setSB(s: String): Rule0 = rule { run(doSet(s)) }
 
-  private def doPrepend(sb: JStringBuilder, c: Char): Unit = {
+  private def doPrepend(c: Char): Unit = {
     val saved = sb.toString
     sb.setLength(0)
     sb.append(c)
     sb.append(saved)
   }
 
-  private def doPrepend(sb: JStringBuilder, s: String): Unit = {
+  private def doPrepend(s: String): Unit = {
     val saved = sb.toString
     sb.setLength(0)
     sb.append(s)
     sb.append(saved)
   }
 
-  private def doSet(sb: JStringBuilder, s: String): Unit = {
+  private def doSet(s: String): Unit = {
     sb.setLength(0)
     sb.append(s)
   }

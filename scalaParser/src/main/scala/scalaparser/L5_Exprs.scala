@@ -2,128 +2,127 @@ package scalaparser
 
 import org.parboiled2._
 
-trait L5_Exprs { this: WhitespaceStringsAndChars
+trait L5_Exprs { this: Parser with WhitespaceStringsAndChars
+  with L0_Basics
+  with L1_KeywordsAndOperators
+  with L2_Identifiers
   with L3_Literals
   with L4_Types
   with L4_Xml =>
 
-  import L0_Basics._
-  import L1_KeywordsAndOperators._
-  import L2_Identifiers._
+  def NewBody: Rule0
+  def BlockDef: Rule0
 
-  val NewBody: Rule0
-  val BlockDef: Rule0
-
-  val Import: Rule0 = {
-    val Selector: Rule0 = rule( Id ~ (`=>` ~ (Id | underscore)).? )
-    val Selectors: Rule0 = rule( '{' ~ (Selector ~ ',').* ~ (Selector | underscore) ~ "}" )
-    val ImportExpr: Rule0 = rule( StableId ~ ('.' ~ (underscore | Selectors)).? )
+  def Import: Rule0 = {
+    def ImportExpr: Rule0 = rule( StableId ~ ('.' ~ (`_` | Selectors)).? )
+    def Selectors: Rule0 = rule( '{' ~ (Selector ~ ',').* ~ (Selector | `_`) ~ "}" )
+    def Selector: Rule0 = rule( Id ~ (`=>` ~ (Id | `_`)).? )
     rule( `import` ~ ImportExpr.+(',') )
   }
 
-  val Ascription = rule( `:` ~ (`_*` |  Type | Annot.+) )
+  def Ascription = rule( `:` ~ (`_*` |  Type | Annot.+) )
 
-  val LambdaHead: Rule0 = {
-    val Binding = rule( (Id | underscore) ~ (`:` ~ Type).? )
-    val Bindings = rule( '(' ~ Binding.*(',') ~ ')' )
-    val Implicit = rule( `implicit`.? ~ Id ~ (`:` ~ InfixType).? )
-    rule( (Bindings | Implicit | underscore ~ Ascription.?) ~ `=>` )
+  def LambdaHead: Rule0 = {
+    def Binding = rule( (Id | `_`) ~ (`:` ~ Type).? )
+    def Bindings = rule( '(' ~ Binding.*(',') ~ ')' )
+    def Implicit = rule( `implicit`.? ~ Id ~ (`:` ~ InfixType).? )
+    rule( (Bindings | Implicit | `_` ~ Ascription.?) ~ `=>` )
   }
   object StatCtx extends WsCtx(true)
   object ExprCtx extends WsCtx(false)
-  val TypeExpr = ExprCtx.Expr
+  def TypeExpr = ExprCtx.Expr
   class WsCtx(injectSemicolons: Boolean){
 
-    val OneSemiMax = if (injectSemicolons) OneNLMax else namedRule("OneSemiMax")(MATCH)
-    val NoSemis = if (injectSemicolons) NotNewline else namedRule("NoSemis")(MATCH)
+    def OneSemiMax = if (injectSemicolons) OneNLMax else MATCH
+    def NoSemis = if (injectSemicolons) NotNewline else MATCH
 
-    val Enumerators = {
-      val Generator = rule( Pat1 ~ `<-` ~ Expr ~ Guard.? )
-      val Assign = rule( Pat1 ~ `=` ~ Expr )
-      val Enumerator = rule( Semis ~ Generator | optional(Semis) ~ Guard | Semis ~ Assign )
+    def Enumerators = {
+      def Generator = rule( Pat1 ~ `<-` ~ Expr ~ Guard.? )
+      def Assign = rule( Pat1 ~ `=` ~ Expr )
+      def Enumerator = rule( Semis ~ Generator | optional(Semis) ~ Guard | Semis ~ Assign )
       rule( Generator ~ Enumerator.* ~ WL )
     }
-    val Expr: Rule0 = {
-      val If = {
-        val Else = rule( Semi.? ~ `else` ~ Expr )
+    def Expr: Rule0 = {
+      def If = {
+        def Else = rule( Semi.? ~ `else` ~ Expr )
         rule( `if` ~ '(' ~ ExprCtx.Expr ~ ')' ~ Expr ~ Else.? )
       }
-      val While = rule( `while` ~ '(' ~ Expr ~ ')' ~ Expr )
-      val Try = {
-        val Catch = rule( `catch` ~ Expr )
-        val Finally = rule( `finally` ~ Expr )
+      def While = rule( `while` ~ '(' ~ Expr ~ ')' ~ Expr )
+      def Try = {
+        def Catch = rule( `catch` ~ Expr )
+        def Finally = rule( `finally` ~ Expr )
         rule( `try` ~ Expr ~ Catch.? ~ Finally.? )
       }
-      val DoWhile = rule( `do` ~ Expr ~ Semi.? ~ `while` ~ '(' ~ Expr ~ ")" )
+      def DoWhile = rule( `do` ~ Expr ~ Semi.? ~ `while` ~ '(' ~ Expr ~ ")" )
 
-      val For = {
-        val Body = rule( '(' ~ ExprCtx.Enumerators ~ ')' | '{' ~ StatCtx.Enumerators ~ '}' )
+      def For = {
+        def Body = rule( '(' ~ ExprCtx.Enumerators ~ ')' | '{' ~ StatCtx.Enumerators ~ '}' )
         rule( `for` ~ Body ~ `yield`.? ~ Expr )
       }
-      val Throw = rule( `throw` ~ Expr )
-      val Return = rule( `return` ~ Expr.? )
+      def Throw = rule( `throw` ~ Expr )
+      def Return = rule( `return` ~ Expr.? )
 
-      val SmallerExpr = rule( PostfixExpr ~ (`match` ~ '{' ~ CaseClauses ~ "}" | Ascription).? )
-      val LambdaBody = rule( If | While | Try | DoWhile | For | Throw | Return | SmallerExpr )
+      def SmallerExpr = rule( PostfixExpr ~ (`match` ~ '{' ~ CaseClauses ~ "}" | Ascription).? )
+      def LambdaBody = rule( If | While | Try | DoWhile | For | Throw | Return | SmallerExpr )
       rule( LambdaHead.* ~ LambdaBody )
     }
 
-    val PostfixExpr: Rule0 = {
-      val Prefixed = rule( (WL ~ anyOf("-+~!") ~ WS ~ !OpChar) ~  SimpleExpr )
-      val Assign = rule( SimpleExpr ~ (`=` ~ Expr).? )
-      val PrefixExpr = rule( Prefixed | Assign )
+    def PostfixExpr: Rule0 = {
+      def Prefixed = rule( (WL ~ anyOf("-+~!") ~ WS ~ !OpChar) ~  SimpleExpr )
+      def Assign = rule( SimpleExpr ~ (`=` ~ Expr).? )
+      def PrefixExpr = rule( Prefixed | Assign )
 
-      val InfixExpr = rule( PrefixExpr ~ (NoSemis ~ Id ~ TypeArgs.? ~ OneSemiMax ~ PrefixExpr).* )
+      def InfixExpr = rule( PrefixExpr ~ (NoSemis ~ Id ~ TypeArgs.? ~ OneSemiMax ~ PrefixExpr).* )
       rule( InfixExpr ~ (NotNewline ~ Id ~ LineEnd.?).? )
     }
 
-    val SimpleExpr: Rule0 = {
-      val Path = rule( (Id ~ '.').* ~ `this` ~ ('.' ~ Id).* | StableId )
-      val New = rule( `new` ~ NewBody )
-      val Parened = rule ( '(' ~ Exprs.? ~ ")"  )
-      val SimpleExpr1 = rule( XmlExpr | New | BlockExpr | WLLiteral | Path | underscore | Parened)
-      rule( SimpleExpr1 ~ ('.' ~ Id | TypeArgs | NoSemis ~ ArgList).* ~ (NoSemis  ~ underscore).?)
+    def SimpleExpr: Rule0 = {
+      def Path = rule( (Id ~ '.').* ~ `this` ~ ('.' ~ Id).* | StableId )
+      def New = rule( `new` ~ NewBody )
+      def Parened = rule ( '(' ~ Exprs.? ~ ")"  )
+      def SimpleExpr1 = rule( XmlExpr | New | BlockExpr | WLLiteral | Path | `_` | Parened)
+      rule( SimpleExpr1 ~ ('.' ~ Id | TypeArgs | NoSemis ~ ArgList).* ~ (NoSemis  ~ `_`).?)
     }
-    val Guard : Rule0 = rule( `if` ~ PostfixExpr )
+    def Guard : Rule0 = rule( `if` ~ PostfixExpr )
   }
-  val SimplePat: Rule0 = {
-    val ExtractorArgs = rule( Pat.*(',') )
-    val Extractor = rule( StableId ~ ('(' ~ ExtractorArgs ~ ')').? )
-    val TupleEx = rule( '(' ~ ExtractorArgs.? ~ ')' )
-    val Thingy = rule( underscore ~ (`:` ~ TypePat).? ~ !"*" )
+  def SimplePat: Rule0 = {
+    def ExtractorArgs = rule( Pat.*(',') )
+    def Extractor = rule( StableId ~ ('(' ~ ExtractorArgs ~ ')').? )
+    def TupleEx = rule( '(' ~ ExtractorArgs.? ~ ')' )
+    def Thingy = rule( `_` ~ (`:` ~ TypePat).? ~ !"*" )
     rule( XmlPattern | Thingy | WLLiteral | TupleEx | Extractor | VarId)
   }
 
-  val BlockExpr: Rule0 = rule( '{' ~ (CaseClauses | Block) ~ `}` )
+  def BlockExpr: Rule0 = rule( '{' ~ (CaseClauses | Block) ~ `}` )
 
-  val BlockStats: Rule0 = {
-    val Prelude = rule( Annot.* ~ `implicit`.? ~ `lazy`.? ~ LocalMod.* )
-    val Tmpl = rule( Prelude ~ BlockDef )
-    val BlockStat = rule( Import | Tmpl | StatCtx.Expr )
+  def BlockStats: Rule0 = {
+    def Prelude = rule( Annot.* ~ `implicit`.? ~ `lazy`.? ~ LocalMod.* )
+    def Tmpl = rule( Prelude ~ BlockDef )
+    def BlockStat = rule( Import | Tmpl | StatCtx.Expr )
     rule( BlockStat.+(Semis) )
   }
 
-  val Block: Rule0 = {
-    val End = rule( Semis.? ~ &("}" | `case`) )
-    val ResultExpr = rule{ StatCtx.Expr | LambdaHead ~ Block}
-    val Body = rule( ResultExpr ~ End | BlockStats ~ (Semis ~ ResultExpr).? ~ End | End )
+  def Block: Rule0 = {
+    def End = rule( Semis.? ~ &("}" | `case`) )
+    def ResultExpr = rule{ StatCtx.Expr | LambdaHead ~ Block}
+    def Body = rule( ResultExpr ~ End | BlockStats ~ (Semis ~ ResultExpr).? ~ End | End )
     rule( LambdaHead.* ~ Semis.? ~ Body )
   }
 
-  val Patterns: Rule0 = rule( Pat.+(",") )
-  val Pat: Rule0 = rule( Pat1.+('|') )
-  val Pat1: Rule0 = rule( underscore ~ `:` ~ TypePat | VarId ~ `:` ~ TypePat | Pat2 )
-  val Pat2: Rule0 = {
-    val Pat3 = rule( `_*` | SimplePat ~ (Id ~ SimplePat).* )
+  def Patterns: Rule0 = rule( Pat.+(",") )
+  def Pat: Rule0 = rule( Pat1.+('|') )
+  def Pat1: Rule0 = rule( `_` ~ `:` ~ TypePat | VarId ~ `:` ~ TypePat | Pat2 )
+  def Pat2: Rule0 = {
+    def Pat3 = rule( `_*` | SimplePat ~ (Id ~ SimplePat).* )
     rule( VarId ~ `@` ~ Pat3 | Pat3 | VarId )
   }
 
-  val TypePat = rule( CompoundType )
+  def TypePat = rule( CompoundType )
 
-  val ArgList: Rule0 = rule( '(' ~ (Exprs ~ (`:` ~ `_*`).?).? ~ ")" | OneNLMax ~ BlockExpr )
+  def ArgList: Rule0 = rule( '(' ~ (Exprs ~ (`:` ~ `_*`).?).? ~ ")" | OneNLMax ~ BlockExpr )
 
-  val CaseClauses: Rule0 = {
-    val CaseClause: Rule0 = rule( `case` ~ Pat ~ ExprCtx.Guard.? ~ `=>` ~ Block )
+  def CaseClauses: Rule0 = {
+    def CaseClause: Rule0 = rule( `case` ~ Pat ~ ExprCtx.Guard.? ~ `=>` ~ Block )
     rule( CaseClause.+ )
   }
 }

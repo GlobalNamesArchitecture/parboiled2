@@ -46,12 +46,12 @@ The artifacts for *parboiled2* live on `Maven Central`_ and can be tied into you
 
 .. code:: Scala
 
-    libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.0"
+    libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.2"
 
-The latest released version is **2.1.0**. It is available for Scala 2.10.3+ as well as Scala 2.11.
+The latest released version is **2.1.2**. It is available for Scala 2.10 as well as Scala 2.11.
 
 *parboiled2* has only one single dependency that it will transitively pull into your classpath: shapeless_
-(currently version 2.1.0).
+(currently version 2.3.0).
 
 **Note:** If your project also uses ``"io.spray" %% "spray-routing"``
 you'll need to change this to ``"io.spray" %% "spray-routing-shapeless2"`` in order for
@@ -150,7 +150,7 @@ How the Parser matches Input
 
 PEG_ parsers are quite easy to understand as they work just like most people without a lot of background in parsing
 theory would build a parser "by hand": recursive-descent with backtracking. They have only one parsing phase (not two,
-like mosts parsers produced by traditional parser generators like ANTLR_), do not require any look-ahead and perform
+like most parsers produced by traditional parser generators like ANTLR_), do not require any look-ahead and perform
 quite well in most real-world scenarios (although they *can* exhibit exponential runtime for certain pathological
 languages and inputs).
 

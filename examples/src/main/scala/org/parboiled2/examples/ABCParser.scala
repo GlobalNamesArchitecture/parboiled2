@@ -18,41 +18,49 @@ package org.parboiled2.examples
 
 import scala.annotation.tailrec
 import scala.util.{ Success, Failure }
-import org.parboiled2.{ParseError, SimpleParser}
+import org.parboiled2._
 
 object ABCParser extends App {
-
-  /**
-   * This parser reads the classic non-context-free language:
-   *
-   *     a^n b^n c^n (for n > 1)
-   *
-   * See also: http://en.wikipedia.org/wiki/Parsing_expression_grammar#Examples
-   */
-  object Parser extends SimpleParser {
-
-    val InputLine = rule { &(A ~ 'c') ~ oneOrMore('a') ~ B ~ !(ch('a') | 'b' | 'c') ~ EOI }
-
-    val A: Rule0 = rule { 'a' ~ optional(A) ~ 'b' }
-
-    val B: Rule0 = rule { 'b' ~ optional(B) ~ 'c' }
-  }
-
   repl()
 
   @tailrec
   def repl(): Unit = {
+    // TODO: Replace next three lines with `scala.Predef.readLine(text: String, args: Any*)`
+    // once BUG https://issues.scala-lang.org/browse/SI-8167 is fixed
     print("---\nEnter expression for abc-parser > ")
     Console.out.flush()
-    Console.readLine() match {
-      case "" ⇒ // terminate
+    readLine() match {
+      case "" ⇒
       case line ⇒
-        Parser.InputLine.run(line) match {
-          case Success(_) ⇒ println("Expression is valid")
-          case Failure(e: ParseError) ⇒ println("Expression is not valid: " + e.format(line))
-          case Failure(e) ⇒ println("Unexpected error during parsing run: " + e)
+        val parser = new ABCParser(line)
+        parser.InputLine.run() match {
+          case Success(_)             ⇒ println("Expression is valid")
+          case Failure(e: ParseError) ⇒ println("Expression is not valid: " + parser.formatError(e))
+          case Failure(e)             ⇒ println("Unexpected error during parsing run: " + e)
         }
         repl()
     }
+  }
+}
+
+/**
+ * This parser reads the classic non-context-free language:
+ *
+ *     a^n b^n c^n (for n > 1)
+ *
+ * See also: http://en.wikipedia.org/wiki/Parsing_expression_grammar#Examples
+ */
+class ABCParser(val input: ParserInput) extends Parser {
+
+  def InputLine = rule {
+    &(A ~ 'c') ~ oneOrMore('a') ~ B ~ !(ch('a') | 'b' | 'c') ~ EOI
+  }
+
+  def A: Rule0 = rule {
+    'a' ~ optional(A) ~ 'b'
+  }
+
+  def B: Rule0 = rule {
+    'b' ~ optional(B) ~ 'c'
   }
 }

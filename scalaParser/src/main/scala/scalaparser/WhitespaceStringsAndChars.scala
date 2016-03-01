@@ -2,9 +2,10 @@ package scalaparser
 
 import org.parboiled2._
 
-abstract class WhitespaceStringsAndChars extends SimpleParser {
-  import L0_Basics._
+trait WhitespaceStringsAndChars extends Parser {
 
-  implicit val wlStr = rule[String]() { s => WL ~ str(s) }
-  implicit val wlCh = rule[Char]() { c => WL ~ ch(c) }
+  def WL: Rule0
+
+  implicit def wlStr(s: String) = rule( WL ~ str(s) )
+  implicit def wlCh(s: Char) = rule( WL ~ ch(s) )
 }

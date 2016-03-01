@@ -83,7 +83,7 @@ public class Base64 {
 
     private final char[] CA;
     private final int[] IA;
-    public final char fillChar;
+    private final char fillChar;
 
     // -------- STATIC METHODS -----------------------------------------------------------------------------------------
 
