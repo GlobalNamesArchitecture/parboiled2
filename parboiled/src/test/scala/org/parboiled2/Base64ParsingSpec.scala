@@ -16,11 +16,14 @@
 
 package org.parboiled2
 
-import scala.util.{ Random, Success }
 import org.specs2.mutable.Specification
+import scala.util.{ Random, Success }
 import org.parboiled2.util.Base64
+import shapeless._
 
 class Base64ParsingSpec extends Specification {
+
+  class TestParser(val input: ParserInput) extends Parser with Base64Parsing
 
   val randomChars = {
     val random = new Random()
@@ -28,15 +31,27 @@ class Base64ParsingSpec extends Specification {
   }
 
   "Base64Parsing" should {
-
-    "support parsing of RFC2045 encoded content" in {
-      Rfc2045Parsing.Base64String.run("cGFyYm9pbGVkIHJvY2tzIQ==").map(new String(_)) === Success("parboiled rocks!")
-    }
-
-    "support parsing of custom-Base64 Strings" in {
-      val encoded = Base64.custom().encodeToString("parboiled rocks!".getBytes, false)
-      new Base64Parsing(Base64.custom()).Base64String.run(encoded).map(new String(_)) === Success("parboiled rocks!")
-    }
+    "enable parsing of RFC2045 Strings" in test("rfc2045String", Base64.rfc2045())
+    "enable parsing of RFC2045 Blocks" in test("rfc2045Block", Base64.rfc2045())
+    "enable parsing of custom-Base64 Strings" in test("base64CustomString", Base64.rfc2045())
+    "enable parsing of custom-Base64 Blocks" in test("base64CustomBlock", Base64.rfc2045())
   }
 
+  val (dispatch, rules) = DynamicRuleDispatch[TestParser, Array[Byte] :: HNil](
+    "rfc2045String", "rfc2045Block", "base64CustomString", "base64CustomBlock")
+
+  def test(ruleName: String, base64: Base64) =
+    (1 to 100).map { x ⇒
+      val string = randomChars.take(x).toString()
+      val encoded = base64.encodeToString(string getBytes UTF8, false)
+      val parser = new TestParser(encoded) with DynamicRuleHandler[TestParser, Array[Byte]:: HNil] {
+        type Result = String
+        def parser: TestParser = this
+        def ruleNotFound(ruleName: String): Result = "n/a"
+        def success(result: Array[Byte] :: HNil): Result = new String(result.head, UTF8)
+        def parseError(error: ParseError): Result = sys.error("unexpected parse error")
+        def failure(error: Throwable): Result = sys.error("unexpected parser exception")
+      }
+      dispatch(parser, ruleName) === string
+    }.reduceLeft(_ and _)
 }

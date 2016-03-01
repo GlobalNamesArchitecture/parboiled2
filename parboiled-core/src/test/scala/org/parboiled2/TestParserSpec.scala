@@ -16,7 +16,6 @@
 
 package org.parboiled2
 
-import org.specs2.matcher.MatchResult
 import org.specs2.specification.{ NoToHtmlLinkFragments, Scope }
 import org.specs2.mutable.Specification
 import org.specs2.control.NoNumberOfTimes
@@ -29,10 +28,8 @@ abstract class TestParserSpec extends Specification with NoToHtmlLinkFragments w
   type TestParserN[L <: HList] = TestParser[L, L]
 
   abstract class TestParser[L <: HList, Out](implicit unpack: Unpack.Aux[L, Out]) extends Parser with Scope {
-    type Context = Any
-
+    var input: ParserInput = _
     def errorFormatter: ErrorFormatter = new ErrorFormatter(showTraces = true)
-    def errorTraceCollectionLimit = 24
 
     def targetRule: RuleN[L]
 
@@ -40,12 +37,13 @@ abstract class TestParserSpec extends Specification with NoToHtmlLinkFragments w
     def beMatchedWith(r: Out) = parse(_: String) === Right(r)
     def beMismatched = beTrue ^^ (parse(_: String).isLeft)
     def beMismatchedWithError(pe: ParseError) = parse(_: String).left.toOption.get === pe
-    def beMismatchedWithErrorMsg(msg: String): String ⇒ MatchResult[String] =
-      input ⇒ parse(input).left.toOption.map(_.format(input, errorFormatter)).get === msg.stripMargin
+    def beMismatchedWithErrorMsg(msg: String) =
+      parse(_: String).left.toOption.map(formatError(_, errorFormatter)).get === msg.stripMargin
 
     def parse(input: String): Either[ParseError, Out] = {
-      import DeliveryScheme.Either
-      targetRule.run(input, errorTraceCollectionLimit = errorTraceCollectionLimit)
+      this.input = input
+      import Parser.DeliveryScheme.Either
+      targetRule.run()
     }
   }
 }

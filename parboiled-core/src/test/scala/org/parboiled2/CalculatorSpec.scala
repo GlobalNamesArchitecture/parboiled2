@@ -19,34 +19,34 @@ package org.parboiled2
 class CalculatorSpec extends TestParserSpec {
 
   // format: OFF
-  object Calculator extends SimpleParser {
-    val InputLine = rule { Expression ~ EOI }
+  abstract class Calculator extends TestParser1[Int] {
+    def InputLine = rule { Expression ~ EOI }
 
-    val Expression: Rule1[Int] = rule {
+    def Expression: Rule1[Int] = rule {
       Term ~ zeroOrMore(
         '+' ~ Term ~> ((_: Int) + _)
       | '-' ~ Term ~> ((_: Int) - _))
     }
 
-    val Term = rule {
+    def Term = rule {
       Factor ~ zeroOrMore(
         '*' ~ Factor ~> ((_: Int) * _)
       | '/' ~ Factor ~> ((_: Int) / _))
     }
 
-    val Factor = rule { Number | Parens }
+    def Factor = rule { Number | Parens }
 
-    val Parens = rule { '(' ~ Expression ~ ')' }
+    def Parens = rule { '(' ~ Expression ~ ')' }
 
-    val Number = rule { capture(Digits) ~> (_.toInt) }
+    def Number = rule { capture(Digits) ~> (_.toInt) }
 
-    val Digits = rule { oneOrMore(CharPredicate.Digit) }
+    def Digits = rule { oneOrMore(CharPredicate.Digit) }
   }
   // format: ON
 
   "The Calculator parser" should {
-    "successfully evaluate simple calculator expression" in new TestParser1[Int] {
-      val targetRule = Calculator.InputLine
+    "successfully evaluate simple calculator expression" in new Calculator {
+      def targetRule = InputLine
 
       "1" must beMatchedWith(1)
       "1+2" must beMatchedWith(3)

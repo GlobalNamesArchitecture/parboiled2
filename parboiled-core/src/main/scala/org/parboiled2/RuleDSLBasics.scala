@@ -18,23 +18,9 @@ package org.parboiled2
 
 import scala.annotation.compileTimeOnly
 import org.parboiled2.support._
-import shapeless.{ HNil, HList }
+import shapeless.HList
 
-trait RuleDSLBasics { this: RuleTypes ⇒
-
-  private type Rule0 = Rule[Any, HNil, HNil] // local brevity alias
-
-  /**
-   * Returns the [[ParserState]] for the current run.
-   */
-  @compileTimeOnly("Calls to `state` must be inside `rule` macro")
-  implicit def state: ParserState[Context] = `n/a`
-
-  /**
-   * Returns the user [[Context]] for the current run. (Shortcut for `state.ctx`)
-   */
-  @compileTimeOnly("Calls to `ctx` must be inside `rule` macro")
-  implicit def ctx: Context = `n/a`
+trait RuleDSLBasics {
 
   /**
    * Matches the given single character.
@@ -59,7 +45,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
    * a successful match.
    */
   @compileTimeOnly("Calls to `valueMap` must be inside `rule` macro")
-  implicit def valueMap[T](m: Map[String, T])(implicit h: HListable[T]): Rule[Any, HNil, h.Out] = `n/a`
+  implicit def valueMap[T](m: Map[String, T])(implicit h: HListable[T]): RuleN[h.Out] = `n/a`
 
   /**
    * Matches any single one of the given characters.
@@ -111,20 +97,17 @@ trait RuleDSLBasics { this: RuleTypes ⇒
   /**
    * Matches no character (i.e. doesn't cause the parser to make any progress) but succeeds always (as a rule).
    */
-  @compileTimeOnly("Calls to `MATCH` must be inside `rule` macro")
-  def MATCH: Rule0 = `n/a`
+  def MATCH: Rule0 = Rule
 
   /**
    * A Rule0 that always fails.
    */
-  @compileTimeOnly("Calls to `MISMATCH0` must be inside `rule` macro")
-  def MISMATCH0: Rule0 = `n/a`
+  def MISMATCH0: Rule0 = MISMATCH
 
   /**
    * A generic Rule that always fails.
    */
-  @compileTimeOnly("Calls to `MISMATCH` must be inside `rule` macro")
-  def MISMATCH[I <: HList, O <: HList]: Rule[Any, I, O] = `n/a`
+  def MISMATCH[I <: HList, O <: HList]: Rule[I, O] = null
 
   /**
    * A rule that always fails and causes the parser to immediately terminate the parsing run.
@@ -135,7 +118,7 @@ trait RuleDSLBasics { this: RuleTypes ⇒
   /**
    * Fully generic variant of [[fail]].
    */
-  def failX[I <: HList, O <: HList](expected: String): Rule[Any, I, O] = `n/a`
+  def failX[I <: HList, O <: HList](expected: String): Rule[I, O] = `n/a`
 
   @compileTimeOnly("Calls to `str2CharRangeSupport` must be inside `rule` macro")
   implicit def str2CharRangeSupport(s: String): CharRangeSupport = `n/a`

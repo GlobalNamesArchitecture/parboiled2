@@ -21,7 +21,7 @@ class CombinatorSpec extends TestParserSpec {
   "The Parser should correctly recognize/reject input for the" >> {
 
     "`~` combinator" in new TestParser0 {
-      val targetRule = rule { 'a' ~ 'b' }
+      def targetRule = rule { 'a' ~ 'b' }
       "" must beMismatched
       "ab" must beMatched
       "ac" must beMismatched
@@ -30,7 +30,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`|` combinator" in new TestParser0 {
-      val targetRule = rule { ch('a') | 'b' }
+      def targetRule = rule { ch('a') | 'b' }
       "" must beMismatched
       "a" must beMatched
       "b" must beMatched
@@ -38,7 +38,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`zeroOrMore(Rule0)` modifier" in new TestParser0 {
-      val targetRule = rule { zeroOrMore("a") ~ EOI }
+      def targetRule = rule { zeroOrMore("a") ~ EOI }
       "" must beMatched
       "a" must beMatched
       "aa" must beMatched
@@ -46,7 +46,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`Rule0.*` modifier" in new TestParser0 {
-      val targetRule = rule { str("a").* ~ EOI }
+      def targetRule = rule { str("a").* ~ EOI }
       "" must beMatched
       "a" must beMatched
       "aa" must beMatched
@@ -54,7 +54,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`zeroOrMore(Rule0).separatedBy('|')` modifier" in new TestParser0 {
-      val targetRule = rule { zeroOrMore("a").separatedBy('|') ~ EOI }
+      def targetRule = rule { zeroOrMore("a").separatedBy('|') ~ EOI }
       "" must beMatched
       "a" must beMatched
       "a|a" must beMatched
@@ -64,7 +64,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`Rule0.*.sep('|')` modifier" in new TestParser0 {
-      val targetRule = rule { str("a").*('|') ~ EOI }
+      def targetRule = rule { str("a").*('|') ~ EOI }
       "" must beMatched
       "a" must beMatched
       "a|a" must beMatched
@@ -74,7 +74,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`zeroOrMore(Rule1[T])` modifier" in new TestParser1[Seq[String]] {
-      val targetRule = rule { zeroOrMore(capture("a")) ~ EOI }
+      def targetRule = rule { zeroOrMore(capture("a")) ~ EOI }
       "a" must beMatchedWith(Seq("a"))
       "aa" must beMatchedWith(Seq("a", "a"))
       "b" must beMismatched
@@ -82,14 +82,14 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`zeroOrMore(Rule[I, O <: I])` modifier" in new TestParser1[String] {
-      val targetRule = rule { capture("a") ~ zeroOrMore(ch('x') ~> ((_: String) + 'x')) ~ EOI }
+      def targetRule = rule { capture("a") ~ zeroOrMore(ch('x') ~> ((_: String) + 'x')) ~ EOI }
       "a" must beMatchedWith("a")
       "ax" must beMatchedWith("ax")
       "axx" must beMatchedWith("axx")
     }
 
     "`oneOrMore(Rule0)` modifier" in new TestParser0 {
-      val targetRule = rule { oneOrMore("a") ~ EOI }
+      def targetRule = rule { oneOrMore("a") ~ EOI }
       "a" must beMatched
       "aa" must beMatched
       "b" must beMismatched
@@ -97,7 +97,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`oneOrMore(Rule0).separatedBy('|')` modifier" in new TestParser0 {
-      val targetRule = rule { oneOrMore("a").separatedBy('|') ~ EOI }
+      def targetRule = rule { oneOrMore("a").separatedBy('|') ~ EOI }
       "" must beMismatched
       "a" must beMatched
       "a|a" must beMatched
@@ -107,7 +107,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`oneOrMore(Rule1[T])` modifier" in new TestParser1[Seq[String]] {
-      val targetRule = rule { oneOrMore(capture("a")) ~ EOI }
+      def targetRule = rule { oneOrMore(capture("a")) ~ EOI }
       "a" must beMatchedWith(Seq("a"))
       "aa" must beMatchedWith(Seq("a", "a"))
       "b" must beMismatched
@@ -115,7 +115,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`Rule1[T].+` modifier" in new TestParser1[Seq[String]] {
-      val targetRule = rule { capture("a").+ ~ EOI }
+      def targetRule = rule { capture("a").+ ~ EOI }
       "a" must beMatchedWith(Seq("a"))
       "aa" must beMatchedWith(Seq("a", "a"))
       "b" must beMismatched
@@ -123,21 +123,21 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`oneOrMore(Rule[I, O <: I])` modifier" in new TestParser1[String] {
-      val targetRule = rule { capture("a") ~ oneOrMore(ch('x') ~> ((_: String) + 'x')) ~ EOI }
+      def targetRule = rule { capture("a") ~ oneOrMore(ch('x') ~> ((_: String) + 'x')) ~ EOI }
       "a" must beMismatched
       "ax" must beMatchedWith("ax")
       "axx" must beMatchedWith("axx")
     }
 
     "`optional(Rule0)` modifier" in new TestParser0 {
-      val targetRule = rule { optional("a") ~ EOI }
+      def targetRule = rule { optional("a") ~ EOI }
       "a" must beMatched
       "b" must beMismatched
       "" must beMatched
     }
 
     "`optional(Rule1[T])` modifier" in new TestParser1[Option[String]] {
-      val targetRule = rule { optional(capture("a")) ~ EOI }
+      def targetRule = rule { optional(capture("a")) ~ EOI }
       "a" must beMatchedWith(Some("a"))
       "" must beMatchedWith(None)
       "b" must beMismatched
@@ -145,41 +145,42 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`optional(Rule[I, O <: I])` modifier" in new TestParser1[String] {
-      val targetRule = rule { capture("a") ~ optional(ch('x') ~> ((_: String) + 'x')) ~ EOI }
+      def targetRule = rule { capture("a") ~ optional(ch('x') ~> ((_: String) + 'x')) ~ EOI }
       "a" must beMatchedWith("a")
       "ax" must beMatchedWith("ax")
       "axx" must beMismatched
     }
 
     "`Rule[I, O <: I].?` modifier" in new TestParser1[String] {
-      val targetRule = rule { capture("a") ~ (ch('x') ~> ((_: String) + 'x')).? ~ EOI }
+      def targetRule = rule { capture("a") ~ (ch('x') ~> ((_: String) + 'x')).? ~ EOI }
       "a" must beMatchedWith("a")
       "ax" must beMatchedWith("ax")
       "axx" must beMismatched
     }
 
     "`!(Rule0)` modifier" in new TestParser0 {
-      val targetRule = rule { !"a" }
+      def targetRule = rule { !"a" }
       "a" must beMismatched
       "b" must beMatched
       "" must beMatched
     }
 
     "`&` modifier" in new TestParser0 {
-      val targetRule = rule { &("a") }
+      def targetRule = rule { &("a") }
       "a" must beMatched
+      cursor === 0
       "b" must beMismatched
       "" must beMismatched
     }
 
     "`1.times(Rule0)` modifier" in new TestParser0 {
-      val targetRule = rule { 1.times("a") }
+      def targetRule = rule { 1.times("a") }
       "a" must beMatched
       "" must beMismatched
     }
 
     "`2.times(Rule0)` modifier (example 1)" in new TestParser0 {
-      val targetRule = rule { 2.times("x") }
+      def targetRule = rule { 2.times("x") }
       "" must beMismatched
       "x" must beMismatched
       "xx" must beMatched
@@ -188,21 +189,21 @@ class CombinatorSpec extends TestParserSpec {
 
     "`n.times(Rule0)` modifier (example 2)" in new TestParser0 {
       val n = 2
-      val targetRule = rule { n.times("x") ~ EOI }
+      def targetRule = rule { n.times("x") ~ EOI }
       "x" must beMismatched
       "xx" must beMatched
       "xxx" must beMismatched
     }
 
     "`2.times(Rule0).separatedBy('|')` modifier" in new TestParser0 {
-      val targetRule = rule { 2.times("x").separatedBy('|') ~ EOI }
+      def targetRule = rule { 2.times("x").separatedBy('|') ~ EOI }
       "xx" must beMismatched
       "x|x" must beMatched
       "x|x|" must beMismatched
     }
 
     "`(2 to 4).times(Rule0)` modifier (example 1)" in new TestParser0 {
-      val targetRule = rule { (2 to 4).times("x") }
+      def targetRule = rule { (2 to 4).times("x") }
       "" must beMismatched
       "x" must beMismatched
       "xx" must beMatched
@@ -212,7 +213,16 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`(2 to 4).times(Rule0)` modifier (example 2)" in new TestParser0 {
-      val targetRule = rule { (2 to 4).times("x") ~ EOI }
+      def targetRule = rule { (2 to 4).times("x") ~ EOI }
+      "xx" must beMatched
+      "xxx" must beMatched
+      "xxxx" must beMatched
+      "xxxxx" must beMismatched
+    }
+
+    "`(2 to max).times(Rule0)` modifier where `max` is 4" in new TestParser0 {
+      val max = 4
+      def targetRule = rule { (2 to max).times("x") ~ EOI }
       "xx" must beMatched
       "xxx" must beMatched
       "xxxx" must beMatched
@@ -220,7 +230,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`(2 to 4).times(Rule0).separatedBy('|')` modifier" in new TestParser0 {
-      val targetRule = rule { (2 to 4).times("x").separatedBy('|') ~ EOI }
+      def targetRule = rule { (2 to 4).times("x").separatedBy('|') ~ EOI }
       "xx" must beMismatched
       "x|" must beMismatched
       "x|x" must beMatched
@@ -233,7 +243,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`(1 to 3).times(Rule1[T])` modifier" in new TestParser1[Seq[String]] {
-      val targetRule = rule { (1 to 3).times(capture("x")) ~ EOI }
+      def targetRule = rule { (1 to 3).times(capture("x")) ~ EOI }
       "" must beMismatched
       "x" must beMatchedWith(Seq("x"))
       "xx" must beMatchedWith(Seq("x", "x"))
@@ -242,7 +252,7 @@ class CombinatorSpec extends TestParserSpec {
     }
 
     "`2.times(Rule[I, O <: I])` modifier" in new TestParser1[String] {
-      val targetRule = rule { capture("a") ~ 2.times(ch('x') ~> ((_: String) + 'x')) ~ EOI }
+      def targetRule = rule { capture("a") ~ 2.times(ch('x') ~> ((_: String) + 'x')) ~ EOI }
       "a" must beMismatched
       "ax" must beMismatched
       "axx" must beMatchedWith("axx")

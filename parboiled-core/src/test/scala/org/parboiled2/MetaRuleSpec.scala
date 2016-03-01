@@ -18,14 +18,13 @@ package org.parboiled2
 
 class MetaRuleSpec extends TestParserSpec {
 
-  "Meta rules" should {
+  "Rule transformation should be possible" >> {
 
-    "work as expected" in new TestParser0 {
-      val targetRule = rule { bracketed1(ab) ~ bracketed2(cd) }
-      val ab = rule { "ab" }
-      val cd = rule { "cd" }
-      val bracketed1 = rule[Rule0]() { inner ⇒ '[' ~ inner ~ ']' }
-      def bracketed2(inner: Rule0) = rule { '[' ~ inner ~ ']' }
+    "using vals and `run`" in new TestParser0 {
+      val ab = () ⇒ rule { "ab" }
+      val cd = () ⇒ rule { "cd" }
+      def targetRule = rule { bracketed(ab) ~ bracketed(cd) }
+      def bracketed(inner: () ⇒ Rule0) = rule { '[' ~ inner() ~ ']' }
 
       "[ab][cd]" must beMatched
       "abcd" must beMismatched

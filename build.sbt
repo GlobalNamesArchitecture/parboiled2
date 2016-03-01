@@ -5,7 +5,7 @@ import scala.xml.{Node => XNode, NodeSeq}
 import com.typesafe.sbt.osgi.SbtOsgi._
 
 val commonSettings = Seq(
-  version := "2.2.2-2015.11.26-DEBUG-SNAPSHOT",
+  version := "2.1.2.1",
   scalaVersion := "2.11.7",
   organization := "org.globalnames",
   homepage := Some(new URL("http://parboiled.org")),
@@ -73,7 +73,7 @@ val noPublishingSettings = Seq(
 /////////////////////// DEPENDENCIES /////////////////////////
 
 val scalaReflect     = "org.scala-lang"  %  "scala-reflect"     % "2.11.7"   % "provided"
-val shapeless        = "com.chuusai"     %% "shapeless"         % "2.2.3"    % "compile"
+val shapeless        = "com.chuusai"     %% "shapeless"         % "2.3.0"    % "compile"
 val specs2Core       = "org.specs2"      %% "specs2-core"       % "2.4.17"   % "test"
 val specs2ScalaCheck = "org.specs2"      %% "specs2-scalacheck" % "2.4.17"   % "test"
 
@@ -98,8 +98,8 @@ lazy val jsonBenchmark = project
   .settings(noPublishingSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "org.json4s" %% "json4s-native" % "3.2.11",
-      "org.json4s" %% "json4s-jackson" % "3.2.11",
+      "org.json4s" %% "json4s-native" % "3.3.0",
+      "org.json4s" %% "json4s-jackson" % "3.3.0",
       "io.argonaut" %% "argonaut" % "6.1"),
     bench := (run in Compile).partialInput(" -i 10 -wi 10 -f1 -t1").evaluated)
 

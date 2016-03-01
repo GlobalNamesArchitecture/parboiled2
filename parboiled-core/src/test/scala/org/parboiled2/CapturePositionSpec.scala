@@ -16,21 +16,21 @@
 
 package org.parboiled2
 
-import scala.util.Success
-import org.specs2.mutable.Specification
+import shapeless._
 
-class StateAccessSpec extends Specification {
+class CapturePositionSpec extends TestParserSpec {
 
-  object Parser extends Parser {
-    class Context(val name: String)
+  "The Parser should correctly handle" >> {
+    "`capturePos` capturing raw position" in new TestParser1[CapturePosition] {
+      def targetRule = rule { capturePos("a") }
+      "a" must beMatchedWith(CapturePosition(0, 1))
+      "b" must beMismatched
+    }
 
-    val Foo = rule { val x = ctx.name; push(ctx.name) ~ ctx.name ~ EOI }
-  }
-
-  "Access to the parser state and context" should {
-
-    "work as expected" in {
-      Parser.Foo.runWithContext("foo", new Parser.Context("foo")) === Success("foo")
+    "`capturePosStr` capturing position and string" in new TestParser1[CapturePositionString] {
+      def targetRule = rule { capturePosStr("a") }
+      "a" must beMatchedWith(CapturePositionString(CapturePosition(0, 1), "a"))
+      "b" must beMismatched
     }
   }
 }

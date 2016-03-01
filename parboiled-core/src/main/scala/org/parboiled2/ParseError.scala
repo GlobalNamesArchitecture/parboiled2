@@ -23,6 +23,8 @@ case class ParseError(position: Position,
                       principalPosition: Position,
                       traces: immutable.Seq[RuleTrace]) extends RuntimeException {
   require(principalPosition.index >= position.index, "principalPosition must be > position")
+  def format(parser: Parser): String = format(parser.input)
+  def format(parser: Parser, formatter: ErrorFormatter): String = format(parser.input, formatter)
   def format(input: ParserInput): String = format(input, new ErrorFormatter())
   def format(input: ParserInput, formatter: ErrorFormatter): String = formatter.format(this, input)
 
@@ -128,6 +130,7 @@ object RuleTrace {
   case object Quiet extends NonTerminalKey
   case object RuleCall extends NonTerminalKey
   case object Run extends NonTerminalKey
+  case object RunSubParser extends NonTerminalKey
   case object Sequence extends NonTerminalKey
   final case class StringMatch(string: String) extends NonTerminalKey
   final case class Times(min: Int, max: Int) extends NonTerminalKey
@@ -135,7 +138,6 @@ object RuleTrace {
 
   sealed trait Terminal
   case object ANY extends Terminal
-  case object MISMATCH extends Terminal
   final case class AnyOf(string: String) extends Terminal
   final case class CharMatch(char: Char) extends Terminal
   final case class CharPredicateMatch(predicate: CharPredicate) extends Terminal

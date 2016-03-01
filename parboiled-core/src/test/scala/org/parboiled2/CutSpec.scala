@@ -19,10 +19,9 @@ package org.parboiled2
 class CutSpec extends TestParserSpec {
 
   "The `~!~` (cut) operator" should {
-
     "work as expected" in new TestParser0 {
-      val targetRule = rule { foo ~ EOI }
-      val foo = rule { "abc" | "a" ~!~ "de" | "axy" }
+      def targetRule = rule { foo ~ EOI }
+      def foo = rule { "abc" | "a" ~!~ "de" | "axy" }
 
       "abc" must beMatched
       "ade" must beMatched
