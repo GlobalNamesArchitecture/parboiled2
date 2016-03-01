@@ -106,7 +106,8 @@ trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
     case q"$a.this.quiet[$b, $c]($arg)"                    ⇒ Quiet(OpTree(arg))
     case q"$a.this.test($flag)"                            ⇒ SemanticPredicate(flag)
     case q"$a.this.capture[$b, $c]($arg)($d)"              ⇒ Capture(OpTree(arg))
-    case q"$a.this.capturePos[..$b]($arg)($d)"             ⇒ CapturePos(OpTree(arg))
+    case q"$a.this.capturePos[..$b]($arg)($d)"             ⇒ CapturePosition(OpTree(arg))
+    case q"$a.this.capturePosStr[..$b]($arg)($d)"          ⇒ CapturePositionString(OpTree(arg))
     case q"$a.this.run[$b]($arg)($c.fromAux[$d, $e]($rr))" ⇒ RunAction(arg, rr)
     case q"$a.this.push[$b]($arg)($hl)"                    ⇒ PushAction(arg, hl)
     case q"$a.this.drop[$b]($hl)"                          ⇒ DropAction(hl)
@@ -522,13 +523,25 @@ trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
       } else false"""
   }
 
-  case class CapturePos(op: OpTree) extends DefaultNonTerminalOpTree {
-    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePos).tree
+  case class CapturePosition(op: OpTree) extends DefaultNonTerminalOpTree {
+    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePosition).tree
     def renderInner(wrapped: Boolean): Tree = q"""
       ${if (!wrapped) q"val start = cursor" else q"();"}
       val matched = ${op.render(wrapped)}
       if (matched) {
-        valueStack.push(org.parboiled2.CapturePos(start, cursor))
+        valueStack.push(org.parboiled2.CapturePosition(start, cursor))
+        true
+      } else false"""
+  }
+
+  case class CapturePositionString(op: OpTree) extends DefaultNonTerminalOpTree {
+    def ruleTraceNonTerminalKey = reify(RuleTrace.CapturePosition).tree
+    def renderInner(wrapped: Boolean): Tree = q"""
+      ${if (!wrapped) q"val start = cursor" else q"();"}
+      val matched = ${op.render(wrapped)}
+      if (matched) {
+        val str = input.sliceString(start, cursor)
+        valueStack.push(org.parboiled2.CapturePosition(start, cursor, str))
         true
       } else false"""
   }
