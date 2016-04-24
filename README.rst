@@ -1,3 +1,6 @@
+.. image:: https://zenodo.org/badge/21429/GlobalNamesArchitecture/parboiled2.svg
+  :target: https://zenodo.org/badge/latestdoi/21429/GlobalNamesArchitecture/parboiled2
+
 **parboiled2**  |--| A Macro-Based PEG Parser Generator for Scala 2.10.3+
 
 .. contents:: Contents of this Document
