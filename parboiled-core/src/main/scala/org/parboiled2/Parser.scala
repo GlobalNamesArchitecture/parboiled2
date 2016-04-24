@@ -24,7 +24,8 @@ import shapeless._
 import org.parboiled2.support._
 
 abstract class Parser(initialValueStackSize: Int = 16,
-                      maxValueStackSize: Int = 1024) extends RuleDSL {
+                      maxValueStackSize: Int = 1024,
+                      collectErrors: Boolean = true) extends RuleDSL {
   import Parser._
 
   require(maxValueStackSize <= 65536, "`maxValueStackSize` > 2^16 is not supported") // due to current snapshot design
@@ -203,11 +204,15 @@ abstract class Parser(initialValueStackSize: Int = 16,
       if (phase0_initialRun())
         scheme.success(valueStack.toHList[L]())
       else {
-        val principalErrorIndex = phase1_establishPrincipalErrorIndex()
-        val p2 = phase2_establishReportedErrorIndex(principalErrorIndex)
-        val reportQuiet = phase3_determineReportQuiet(principalErrorIndex)
-        val parseError = phase4_collectRuleTraces(p2.reportedErrorIndex, principalErrorIndex, reportQuiet)()
-        scheme.parseError(parseError)
+        if (collectErrors) {
+          val principalErrorIndex = phase1_establishPrincipalErrorIndex()
+          val p2 = phase2_establishReportedErrorIndex(principalErrorIndex)
+          val reportQuiet = phase3_determineReportQuiet(principalErrorIndex)
+          val parseError = phase4_collectRuleTraces(p2.reportedErrorIndex, principalErrorIndex, reportQuiet)()
+          scheme.parseError(parseError)
+        } else {
+          scheme.failure(new Exception("Parser is not collecting errors. Set `collectErrors` to true to collect errors"))
+        }
       }
     } catch {
       case e: Parser.Fail ⇒
