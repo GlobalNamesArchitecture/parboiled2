@@ -5,10 +5,10 @@ import scala.xml.{Node => XNode, NodeSeq}
 import com.typesafe.sbt.osgi.SbtOsgi._
 
 val commonSettings = Seq(
-  version := "2.1.2.1",
+  version := "2.1.2.2",
   scalaVersion := "2.11.7",
   organization := "org.globalnames",
-  homepage := Some(new URL("http://parboiled.org")),
+  homepage := Some(new URL("https://github.com/GlobalNamesArchitecture/parboiled2")),
   description := "Fast and elegant PEG parsing in Scala - lightweight, easy-to-use, powerful",
   startYear := Some(2009),
   licenses := Seq("Apache-2.0" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
